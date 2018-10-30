@@ -70,20 +70,4 @@ public class SecurityResourceServerConfig extends ResourceServerConfigurerAdapte
 
         return jwtAccessTokenConverter;
     }
-
-    private RSAPublicKey loadPublicKey() {
-        try {
-            byte[] buffer = Base64.getDecoder().decode(jwtPublicKey);
-            PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(buffer);
-            KeyFactory keyFactory = null;
-            keyFactory = KeyFactory.getInstance("RSA");
-            return (RSAPublicKey) keyFactory.generatePublic(keySpec);
-
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (InvalidKeySpecException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
 }
