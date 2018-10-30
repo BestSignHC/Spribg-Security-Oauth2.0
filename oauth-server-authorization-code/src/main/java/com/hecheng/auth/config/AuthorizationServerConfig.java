@@ -1,0 +1,60 @@
+package com.hecheng.auth.config;
+
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
+import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
+import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
+import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
+import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
+import org.springframework.security.oauth2.provider.client.JdbcClientDetailsService;
+import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
+
+import javax.annotation.Resource;
+import javax.sql.DataSource;
+
+/**
+ * 认证服务器配置
+ */
+@Configuration
+@EnableAuthorizationServer
+public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
+
+    @Resource
+    private DataSource dataSource;
+
+    @Override
+    public void configure(AuthorizationServerSecurityConfigurer security) throws Exception {
+        //允许表单认证，用于post方式请求code
+        //当然必须带上：
+        //Content-Type: application/x-www-form-urlencoded;charset=utf-8
+        security.allowFormAuthenticationForClients();
+    }
+
+    @Override
+    public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
+
+        //*************** 使用内存方式 BEGIN*********************//
+//        BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
+//        String finalPassword = "{bcrypt}" + bCryptPasswordEncoder.encode("123");
+//        clients.inMemory()
+//                .withClient("client1")      //设置client_id
+//                .authorizedGrantTypes("authorization_code", "refresh_token") //设置允许authorization_code以及refresh_token授权方式
+//                .scopes("query")                    //设置权限列表
+//                .secret(finalPassword)
+//                .redirectUris("http://www.baidu.com");
+        //*************** 使用内存方式 END *********************//
+
+        //*************** 使用JDBC方式 BEGIN*********************//
+        clients.withClientDetails(new JdbcClientDetailsService(dataSource));
+        //*************** 使用JDBC方式 END *********************//
+
+    }
+
+    @Override
+    public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
+        //允许使用GET/POST方式请求TOKEN
+        endpoints.allowedTokenEndpointRequestMethods(HttpMethod.GET, HttpMethod.POST);
+        endpoints.tokenStore(new JdbcTokenStore(dataSource));
+    }
+}
