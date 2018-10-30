@@ -67,6 +67,7 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
         endpoints.allowedTokenEndpointRequestMethods(HttpMethod.GET, HttpMethod.POST);
 //        endpoints.tokenStore(new JdbcTokenStore(dataSource));
         endpoints.tokenStore(tokenStore());
+        endpoints.accessTokenConverter(jwtAccessTokenConverter());
     }
 
     @Bean
