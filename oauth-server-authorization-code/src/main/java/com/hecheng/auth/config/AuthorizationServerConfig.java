@@ -13,9 +13,7 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Aut
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.client.JdbcClientDetailsService;
-import org.springframework.security.oauth2.provider.token.DefaultAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.TokenStore;
-import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 
@@ -65,11 +63,18 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
     public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
         //允许使用GET/POST方式请求TOKEN
         endpoints.allowedTokenEndpointRequestMethods(HttpMethod.GET, HttpMethod.POST);
+
+        //*************** 使用JDBC方式 BEGIN*********************//
 //        endpoints.tokenStore(new JdbcTokenStore(dataSource));
+        //*************** 使用JDBC方式 END *********************//
+
+        //*************** 使用JWT方式 BEGIN*********************//
         endpoints.tokenStore(tokenStore());
         endpoints.accessTokenConverter(jwtAccessTokenConverter());
+        //*************** 使用JWT方式 END *********************//
     }
 
+    //*************** 使用JWT方式 BEGIN*********************//
     @Bean
     public TokenStore tokenStore() {
         TokenStore tokenStore = new JwtTokenStore(jwtAccessTokenConverter());
@@ -86,6 +91,7 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
                 final Map<String, Object> additionalInformation = new HashMap<>();
                 additionalInformation.put("userName", userName);
                 additionalInformation.put("roles", user.getAuthorities());
+                additionalInformation.put("test_key", "test_value");
                 ((DefaultOAuth2AccessToken) accessToken).setAdditionalInformation(additionalInformation);
                 OAuth2AccessToken enhancedToken = super.enhance(accessToken, authentication);
                 return enhancedToken;
@@ -94,4 +100,5 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
         jwtAccessTokenConverter.setSigningKey("123");   //测试用
         return jwtAccessTokenConverter;
     }
+    //*************** 使用JWT方式 END *********************//
 }
