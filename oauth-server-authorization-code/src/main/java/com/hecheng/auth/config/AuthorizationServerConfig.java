@@ -1,5 +1,6 @@
 package com.hecheng.auth.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -28,6 +29,9 @@ import java.util.Map;
 @Configuration
 @EnableAuthorizationServer
 public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
+
+    @Value("${app.oauth.jwt.privateKey}")
+    private String jwtPrivateKey;
 
     @Resource
     private DataSource dataSource;
@@ -97,7 +101,11 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
                 return enhancedToken;
             }
         };
-        jwtAccessTokenConverter.setSigningKey("123");   //测试用
+
+//        jwtAccessTokenConverter.setSigningKey("123");   //测试用
+        //RSA方式
+        jwtAccessTokenConverter.setSigningKey(jwtPrivateKey);
+
         return jwtAccessTokenConverter;
     }
     //*************** 使用JWT方式 END *********************//
