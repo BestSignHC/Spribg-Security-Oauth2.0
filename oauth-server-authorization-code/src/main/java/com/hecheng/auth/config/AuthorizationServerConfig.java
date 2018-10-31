@@ -1,9 +1,11 @@
 package com.hecheng.auth.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
@@ -17,6 +19,7 @@ import org.springframework.security.oauth2.provider.client.JdbcClientDetailsServ
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
+import org.springframework.security.provisioning.JdbcUserDetailsManager;
 
 import javax.annotation.Resource;
 import javax.sql.DataSource;
@@ -35,6 +38,9 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
 
     @Resource
     private DataSource dataSource;
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
 
     @Override
     public void configure(AuthorizationServerSecurityConfigurer security) throws Exception {
@@ -68,6 +74,8 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
         //允许使用GET/POST方式请求TOKEN
         endpoints.allowedTokenEndpointRequestMethods(HttpMethod.GET, HttpMethod.POST);
 
+        endpoints.authenticationManager(authenticationManager);
+
         //*************** 使用JDBC方式 BEGIN*********************//
 //        endpoints.tokenStore(new JdbcTokenStore(dataSource));
         //*************** 使用JDBC方式 END *********************//
@@ -76,6 +84,7 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
         endpoints.tokenStore(tokenStore());
         endpoints.accessTokenConverter(jwtAccessTokenConverter());
         //*************** 使用JWT方式 END *********************//
+
     }
 
     //*************** 使用JWT方式 BEGIN*********************//
