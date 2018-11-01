@@ -4,12 +4,12 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.hecheng.auth</groupId>
-	<artifactId>oauth-server-authorization-code</artifactId>
+	<artifactId>oauth-authorization-server</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
-	<name>oauth-server-authorization-code</name>
-	<description>Oauth2.0 Authorization Code Demo</description>
+	<name>oauth-authorization-server</name>
+	<description>Oauth2.0 Authorization Server Demo</description>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>

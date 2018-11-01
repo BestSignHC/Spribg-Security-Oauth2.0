@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.User;
+import org.springframework.security.jwt.crypto.sign.RsaVerifier;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
@@ -20,6 +20,7 @@ import org.springframework.security.oauth2.provider.client.JdbcClientDetailsServ
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
+import org.springframework.security.provisioning.JdbcUserDetailsManager;
 
 import javax.annotation.Resource;
 import javax.sql.DataSource;
@@ -35,6 +36,9 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
 
     @Value("${app.oauth.jwt.privateKey}")
     private String jwtPrivateKey;
+
+    @Value("${app.oauth.jwt.publicKey}")
+    private String jwtPublicKey;
 
     @Resource
     private DataSource dataSource;
@@ -75,6 +79,9 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
         endpoints.allowedTokenEndpointRequestMethods(HttpMethod.GET, HttpMethod.POST);
 
         endpoints.authenticationManager(authenticationManager);
+
+        //这个不配的话refresh_token会报错
+        endpoints.userDetailsService(new JdbcUserDetailsManager(dataSource));
 
         //*************** 使用JDBC方式 BEGIN*********************//
 //        endpoints.tokenStore(new JdbcTokenStore(dataSource));
@@ -118,6 +125,9 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
 //        jwtAccessTokenConverter.setSigningKey("123");   //测试用
         //RSA方式
         jwtAccessTokenConverter.setSigningKey(jwtPrivateKey);
+
+        //这个也需要，使用refresh_token刷新的时候，需要校验
+        jwtAccessTokenConverter.setVerifier(new RsaVerifier(jwtPublicKey));
 
         return jwtAccessTokenConverter;
     }
