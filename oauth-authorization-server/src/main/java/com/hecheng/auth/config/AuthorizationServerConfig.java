@@ -10,6 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.jwt.crypto.sign.RsaVerifier;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.config.annotation.builders.ClientDetailsServiceBuilder;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
@@ -18,6 +19,7 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Aut
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.client.JdbcClientDetailsService;
 import org.springframework.security.oauth2.provider.token.TokenStore;
+import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
@@ -69,6 +71,7 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
         //*************** 使用内存方式 END *********************//
 
         //*************** 使用JDBC方式 BEGIN*********************//
+//        clients.jdbc(dataSource);
         clients.withClientDetails(new JdbcClientDetailsService(dataSource));
         //*************** 使用JDBC方式 END *********************//
     }
@@ -84,52 +87,52 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
         endpoints.userDetailsService(new JdbcUserDetailsManager(dataSource));
 
         //*************** 使用JDBC方式 BEGIN*********************//
-//        endpoints.tokenStore(new JdbcTokenStore(dataSource));
+        endpoints.tokenStore(new JdbcTokenStore(dataSource));
         //*************** 使用JDBC方式 END *********************//
 
         //*************** 使用JWT方式 BEGIN*********************//
-        endpoints.tokenStore(tokenStore());
-        endpoints.accessTokenConverter(jwtAccessTokenConverter());
+//        endpoints.tokenStore(tokenStore());
+//        endpoints.accessTokenConverter(jwtAccessTokenConverter());
         //*************** 使用JWT方式 END *********************//
 
     }
 
     //*************** 使用JWT方式 BEGIN*********************//
-    @Bean
-    public TokenStore tokenStore() {
-        TokenStore tokenStore = new JwtTokenStore(jwtAccessTokenConverter());
-        return tokenStore;
-    }
-
-    private JwtAccessTokenConverter jwtAccessTokenConverter() {
-        JwtAccessTokenConverter jwtAccessTokenConverter = new JwtAccessTokenConverter() {
-            @Override
-            public OAuth2AccessToken enhance(OAuth2AccessToken accessToken, OAuth2Authentication authentication) {
-                Authentication userAuthentication = authentication.getUserAuthentication();
-                String userName = null;
-
-                if (userAuthentication != null) {
-                    userName = userAuthentication.getName();
-                }
-
-                /** 自定义一些token属性 ***/
-                final Map<String, Object> additionalInformation = new HashMap<>();
-                additionalInformation.put("userName", userName);
-                additionalInformation.put("test_key", "test_value");
-                ((DefaultOAuth2AccessToken) accessToken).setAdditionalInformation(additionalInformation);
-                OAuth2AccessToken enhancedToken = super.enhance(accessToken, authentication);
-                return enhancedToken;
-            }
-        };
-
-//        jwtAccessTokenConverter.setSigningKey("123");   //测试用
-        //RSA方式
-        jwtAccessTokenConverter.setSigningKey(jwtPrivateKey);
-
-        //这个也需要，使用refresh_token刷新的时候，需要校验
-        jwtAccessTokenConverter.setVerifier(new RsaVerifier(jwtPublicKey));
-
-        return jwtAccessTokenConverter;
-    }
+//    @Bean
+//    public TokenStore tokenStore() {
+//        TokenStore tokenStore = new JwtTokenStore(jwtAccessTokenConverter());
+//        return tokenStore;
+//    }
+//
+//    private JwtAccessTokenConverter jwtAccessTokenConverter() {
+//        JwtAccessTokenConverter jwtAccessTokenConverter = new JwtAccessTokenConverter() {
+//            @Override
+//            public OAuth2AccessToken enhance(OAuth2AccessToken accessToken, OAuth2Authentication authentication) {
+//                Authentication userAuthentication = authentication.getUserAuthentication();
+//                String userName = null;
+//
+//                if (userAuthentication != null) {
+//                    userName = userAuthentication.getName();
+//                }
+//
+//                /** 自定义一些token属性 ***/
+//                final Map<String, Object> additionalInformation = new HashMap<>();
+//                additionalInformation.put("userName", userName);
+//                additionalInformation.put("test_key", "test_value");
+//                ((DefaultOAuth2AccessToken) accessToken).setAdditionalInformation(additionalInformation);
+//                OAuth2AccessToken enhancedToken = super.enhance(accessToken, authentication);
+//                return enhancedToken;
+//            }
+//        };
+//
+////        jwtAccessTokenConverter.setSigningKey("123");   //测试用
+//        //RSA方式
+//        jwtAccessTokenConverter.setSigningKey(jwtPrivateKey);
+//
+//        //这个也需要，使用refresh_token刷新的时候，需要校验
+//        jwtAccessTokenConverter.setVerifier(new RsaVerifier(jwtPublicKey));
+//
+//        return jwtAccessTokenConverter;
+//    }
     //*************** 使用JWT方式 END *********************//
 }

@@ -10,6 +10,7 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.E
 import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
 import org.springframework.security.oauth2.provider.token.TokenStore;
+import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 
@@ -44,24 +45,24 @@ public class SecurityResourceServerConfig extends ResourceServerConfigurerAdapte
     }
 
 //    JDBC方式
-//    @Bean
-//    public JdbcTokenStore tokenStore() {
-//        return new JdbcTokenStore(dataSource);
-//    }
+    @Bean
+    public JdbcTokenStore tokenStore() {
+        return new JdbcTokenStore(dataSource);
+    }
 
     //jwt方式
-    @Bean
-    public TokenStore tokenStore() {
-        TokenStore tokenStore = new JwtTokenStore(jwtAccessTokenConverter());
-        return tokenStore;
-    }
+//    @Bean
+//    public TokenStore tokenStore() {
+//        TokenStore tokenStore = new JwtTokenStore(jwtAccessTokenConverter());
+//        return tokenStore;
+//    }
 
-    private JwtAccessTokenConverter jwtAccessTokenConverter() {
-        JwtAccessTokenConverter jwtAccessTokenConverter = new JwtAccessTokenConverter();
-//        jwtAccessTokenConverter.setSigningKey("123");   //测试用
-//        jwtAccessTokenConverter.setVerifier(new MacSigner("123"));  //必须这样设置，否则会没有SignerVerify
-        jwtAccessTokenConverter.setVerifier(new RsaVerifier(jwtPublicKey));
-
-        return jwtAccessTokenConverter;
-    }
+//    private JwtAccessTokenConverter jwtAccessTokenConverter() {
+//        JwtAccessTokenConverter jwtAccessTokenConverter = new JwtAccessTokenConverter();
+////        jwtAccessTokenConverter.setSigningKey("123");   //测试用
+////        jwtAccessTokenConverter.setVerifier(new MacSigner("123"));  //必须这样设置，否则会没有SignerVerify
+//        jwtAccessTokenConverter.setVerifier(new RsaVerifier(jwtPublicKey));
+//
+//        return jwtAccessTokenConverter;
+//    }
 }
